@@ -43,13 +43,39 @@ void startPll()
     while((RCC->CR & RCC_CR_HSERDY)==0) ; //Wait
     
     //Start the PLL
-    RCC->PLLCKSELR |= RCC_PLLCKSELR_DIVM1_0
+    RCC->PLLCKSELR |= 
+#if (HSE_VALUE == 25000000)
+                    RCC_PLLCKSELR_DIVM1_0     //M=1
                     | RCC_PLLCKSELR_DIVM1_2     //M=5 (25MHz/5)5MHz
+#elif (HSE_VALUE == 8000000)
+                    RCC_PLLCKSELR_DIVM1_1     //M=2
+#else
+    #error "HSE value not supported!"          
+#endif
                     | RCC_PLLCKSELR_PLLSRC_HSE; //HSE selected as PLL source
-    RCC->PLL1DIVR = (2-1)<<24 // R=2
-                  | (8-1)<<16 // Q=8
-                  | (2-1)<<9  // P=2
-                  | (160-1);  // N=160
+
+    RCC->PLL1DIVR = (2-1)<<RCC_PLL1DIVR_R1_Pos // R=2
+                  | (8-1)<<RCC_PLL1DIVR_Q1_Pos // Q=8
+                  | (2-1)<<RCC_PLL1DIVR_P1_Pos  // P=2
+#if (HSE_VALUE == 25000000)
+    #ifdef SYSCLK_FREQ_550MHz
+                    | (220-1)<<RCC_PLL1DIVR_N1_Pos;  // N=160 = 1100MHz
+    #elif defined(SYSCLK_FREQ_400MHz)
+                    | (160-1)<<RCC_PLL1DIVR_N1_Pos;  // N=160 = 800MHz
+    #else
+        #error "SYSCLK value not supported!"         
+    #endif
+#elif (HSE_VALUE == 8000000)
+    #ifdef SYSCLK_FREQ_550MHz
+                    | (275-1)<<RCC_PLL1DIVR_N1_Pos;  // N=100 = 1100MHz
+    #elif defined(SYSCLK_FREQ_400MHz)
+                    | (200-1)<<RCC_PLL1DIVR_N1_Pos;  // N=200 = 800MHz
+    #else
+        #error "SYSCLK value not supported!"         
+    #endif
+#else
+    #error "HSE value not supported!"          
+#endif
     RCC->PLLCFGR |= RCC_PLLCFGR_PLL1RGE_2 // Pll ref clock between 4 and 8MHz
                   | RCC_PLLCFGR_DIVP1EN   // Enable output P
                   | RCC_PLLCFGR_DIVQ1EN   // Enable output Q
