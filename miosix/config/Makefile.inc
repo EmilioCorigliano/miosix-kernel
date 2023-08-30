@@ -2497,8 +2497,6 @@ else ifeq ($(ARCH),cortexM7_stm32h7)
     arch/common/core/mpu_cortexMx.cpp                        \
     arch/common/drivers/serial_stm32.cpp                     \
     arch/common/drivers/sd_stm32h7.cpp                       \
-    _examples/datalogger/Logger.cpp                          \
-    _examples/datalogger/tscpp/buffer.cpp                    \
     arch/common/core/cache_cortexMx.cpp                      \
     arch/common/drivers/dcc.cpp                              \
     $(ARCH_INC)/drivers/pll.cpp                              \
